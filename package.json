@@ -1,0 +1,28 @@
+{
+  "name": "@smontero/eosio-signing-tools",
+  "version": "0.0.1",
+  "description": "Utils for validating eosio signatures",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx babel src --out-dir dist",
+    "test": "jest --watch"
+  },
+  "author": "Sebastian Montero",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.11.5",
+    "@babel/core": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@types/jest": "^26.0.10",
+    "eslint": "^7.14.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "jest": "^26.4.2"
+  },
+  "dependencies": {
+    "eosjs-ecc": "^4.0.7",
+    "node-fetch": "^2.6.1"
+  }
+}
