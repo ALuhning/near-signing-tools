@@ -42,6 +42,8 @@ class SigningTools {
   /**
   * @param {string} chainId
   * @param {string} account
+  * @param {string} signature
+  * @param {string} data
   * @returns {boolean} whether verfication was succesful
   */
   static async verifySignature ({
