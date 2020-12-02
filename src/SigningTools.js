@@ -3,6 +3,11 @@ const ecc = require('eosjs-ecc')
 const ChainNodeMap = require('./ChainNodeMap')
 
 class SigningTools {
+  /**
+  * @param {string} chainId
+  * @param {string} account
+  * @returns {Object} with account info
+  */
   static async getAccountInfo (chainId, account) {
     const node = ChainNodeMap[chainId]
     if (!node) {
@@ -20,6 +25,11 @@ class SigningTools {
     return accountInfo.json()
   }
 
+  /**
+  * @param {string} chainId
+  * @param {string} account
+  * @returns {Array} with accounts public keys
+  */
   static async getPublicKeys (chainId, account) {
     const { permissions } = await this.getAccountInfo(chainId, account)
     const pubKeys = []
@@ -29,6 +39,11 @@ class SigningTools {
     return pubKeys
   }
 
+  /**
+  * @param {string} chainId
+  * @param {string} account
+  * @returns {boolean} whether verfication was succesful
+  */
   static async verifySignature ({
     chainId,
     account,
