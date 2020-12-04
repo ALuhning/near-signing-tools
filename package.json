@@ -1,6 +1,6 @@
 {
   "name": "@smontero/eosio-signing-tools",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Utils for validating eosio signatures",
   "main": "dist/index.js",
   "scripts": {
