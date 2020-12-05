@@ -33,9 +33,11 @@ class SigningTools {
   static async getPublicKeys (chainId, account) {
     const { permissions } = await this.getAccountInfo(chainId, account)
     const pubKeys = []
-    permissions.forEach(({ required_auth: { keys } }) => {
-      keys.forEach(({ key }) => pubKeys.push(key))
-    })
+    if (permissions) {
+      permissions.forEach(({ required_auth: { keys } }) => {
+        keys.forEach(({ key }) => pubKeys.push(key))
+      })
+    }
     return pubKeys
   }
 
