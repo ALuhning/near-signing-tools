@@ -1,6 +1,8 @@
-const fetch = require('node-fetch')
-const ecc = require('eosjs-ecc')
-const ChainNodeMap = require('./ChainNodeMap')
+import nacl from 'tweetnacl'
+import * as nearAPI from 'near-api-js'
+const { NearProvider } = require('near-web3-provider')
+const axios = require('axios').default
+const util = require('util')
 
 class SigningTools {
   /**
@@ -8,21 +10,14 @@ class SigningTools {
   * @param {string} account
   * @returns {Object} with account info
   */
-  static async getAccountInfo (chainId, account) {
-    const node = ChainNodeMap[chainId]
-    if (!node) {
-      throw new Error(`No node found for chainId: ${chainId}`)
-    }
-    const {
-      host,
-      port
-    } = node
-    const accountInfo = await fetch(`https://${host}:${port}/v1/chain/get_account`, {
-      method: 'post',
-      body: JSON.stringify({ account_name: account }),
-      headers: { 'Content-Type': 'application/json' }
+  async getAccountInfo (chainId, account) {
+    const nearProvider = new NearProvider({
+      networkId: chainId,
+      masterAccountId: account,
+      keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore()
     })
-    return accountInfo.json()
+    const accountInfo = nearProvider.account
+    return accountInfo
   }
 
   /**
@@ -30,15 +25,32 @@ class SigningTools {
   * @param {string} account
   * @returns {Array} with accounts public keys
   */
-  static async getPublicKeys (chainId, account) {
-    const { permissions } = await this.getAccountInfo(chainId, account)
-    const pubKeys = []
-    if (permissions) {
-      permissions.forEach(({ required_auth: { keys } }) => {
-        keys.forEach(({ key }) => pubKeys.push(key))
-      })
+  async getPublicKeys (account) {
+    const body = {
+      jsonrpc: '2.0',
+      id: 'dontcare',
+      method: 'query',
+      params: {
+        request_type: 'view_access_key_list',
+        finality: 'final',
+        account_id: account
+      }
     }
+
+    const response = await axios.post('https://rpc.testnet.near.org', body)
+    console.log(response)
+    const pubKeys = []
+    response.data.result.keys.forEach(key => {
+      if (key.access_key.permission) {
+        console.log('key', key)
+        pubKeys.push(key.public_key)
+      }
+    })
     return pubKeys
+  }
+
+  str2ab (text) {
+    return new util.TextEncoder().encode(text)
   }
 
   /**
@@ -48,15 +60,28 @@ class SigningTools {
   * @param {string} data
   * @returns {boolean} whether verfication was succesful
   */
-  static async verifySignature ({
+  async verifySignature ({
     chainId,
     account,
     signature,
     data
   }) {
-    const pubKeys = await this.getPublicKeys(chainId, account)
+    const pubKeys = await this.getPublicKeys(account)
+    console.log('pubKeys', pubKeys)
+
+    const sigprep = Buffer.from(signature, 'base64')
+    const sigFinal = Uint8Array.from(sigprep)
+    console.log('sigPrep', sigFinal)
+
+    const msgPrep = this.str2ab(data)
+    const msgFinal = Uint8Array.from(msgPrep)
+    console.log('msgPrep', msgFinal)
+
     for (const pubKey of pubKeys) {
-      if (ecc.verify(signature, data, pubKey)) {
+      console.log('pubKey', pubKey)
+      const pubkeyprep = nearAPI.utils.PublicKey.from(pubKey)
+      const pubKeyFinal = Uint8Array.from(pubkeyprep.data)
+      if (nacl.sign.detached.verify(msgFinal, sigFinal, pubKeyFinal)) {
         return true
       }
     }
@@ -64,4 +89,4 @@ class SigningTools {
   }
 }
 
-module.exports = SigningTools
+export const signingTools = new SigningTools()

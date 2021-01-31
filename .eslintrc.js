@@ -19,6 +19,7 @@ module.exports = {
     'no-param-reassign': ['off'],
     'no-restricted-syntax': ['off'],
     'no-prototype-builtins': ['off'],
-    'guard-for-in': ['off']
+    'guard-for-in': ['off'],
+    'quote-props': ['off']
   }
 }
